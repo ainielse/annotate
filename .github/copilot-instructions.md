@@ -14,7 +14,7 @@ This is an Oracle 26ai annotation project. The goal is to generate and manage ta
 
 - Annotation scripts go in `./annotations/<table_name_lowercase>/`
 - Two files per table: `table_comment.sql` and `column_comments.sql`
-- See `annotations/health_patients/` for canonical examples
+- See `.github/skills/annotate/examples/health_patients/` for canonical examples
 
 ## Annotation Types
 

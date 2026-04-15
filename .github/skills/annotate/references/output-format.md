@@ -62,5 +62,5 @@ alter table <table_name> modify <column_name> annotation ai_context '<value>';
 ## Canonical Example
 
 See existing files for the canonical output format:
-- [table_comment.sql](../../../annotations/health_patients/table_comment.sql)
-- [column_comments.sql](../../../annotations/health_patients/column_comments.sql)
+- [table_comment.sql](../examples/health_patients/table_comment.sql)
+- [column_comments.sql](../examples/health_patients/column_comments.sql)
