@@ -16,7 +16,10 @@ Generate `display_label`, `format_mask`, `primary_display_column`, `search_facet
 
 1. Parse the user's input for one or more table patterns separated by commas (e.g., `EMP, DEPT, HEALTH%`).
 2. Wildcards use SQL `LIKE` syntax: `%` for multi-char, `_` for single-char.
-3. Connect to the database via SQLcl MCP: use `list-connections` to find available connections, then `connect`.
+3. Connect to the database via SQLcl MCP:
+   - Use `list-connections` to show available connections.
+   - Ask the user which connection to use (present the list).
+   - Use `connect` with the chosen connection name.
 4. Resolve each pattern:
 
 ```sql
