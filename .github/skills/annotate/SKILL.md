@@ -1,12 +1,12 @@
 ---
 name: annotate
-description: 'Generate Oracle 26ai table and column annotation scripts. Use when: annotate tables, create annotations, add annotations, generate annotations, inspect data model, annotation scripts, display_label, ai_context, semantic_type, search_facet, format_mask, primary_display_column. Supports batch processing with wildcard patterns (e.g., HEALTH%, EMP, DEPT). Can enrich annotations from APEX UI Defaults or APEX Application inspection.'
-argument-hint: 'Table name(s) or patterns, e.g.: HEALTH_PATIENTS or EMP, DEPT, HEALTH%'
+description: 'Generate Oracle 26ai table and column annotation scripts. Use when: annotate tables, annotate views, create annotations, add annotations, generate annotations, inspect data model, annotation scripts, display_label, ai_context, semantic_type, search_facet, format_mask, primary_display_column. Supports batch processing with wildcard patterns (e.g., HEALTH%, EMP, DEPT). Can enrich annotations from APEX UI Defaults or APEX Application inspection.'
+argument-hint: 'Table/view name(s) or patterns, e.g.: HEALTH_PATIENTS or EMP, DEPT, HEALTH%'
 ---
 
 # Oracle 26ai Annotation Generator
 
-Generate `display_label`, `format_mask`, `primary_display_column`, `search_facet`, `semantic_type`, and `ai_context` annotations for Oracle 26ai tables by inspecting the data model and optionally APEX metadata.
+Generate `display_label`, `format_mask`, `primary_display_column`, `search_facet`, `semantic_type`, and `ai_context` annotations for Oracle 26ai tables and views by inspecting the data model and optionally APEX metadata.
 
 **Prerequisites:** SQLcl MCP server must be available and connected to the target database.
 
@@ -14,59 +14,80 @@ Generate `display_label`, `format_mask`, `primary_display_column`, `search_facet
 
 ### Step 0 — Parse Input & Configure
 
-1. Parse the user's input for one or more table patterns separated by commas (e.g., `EMP, DEPT, HEALTH%`).
+1. Parse the user's input for one or more table/view patterns separated by commas (e.g., `EMP, DEPT, HEALTH%`).
 2. Wildcards use SQL `LIKE` syntax: `%` for multi-char, `_` for single-char.
 3. Connect to the database via SQLcl MCP:
    - Use `list-connections` to show available connections.
    - Ask the user which connection to use (present the list).
    - Use `connect` with the chosen connection name.
-4. Resolve each pattern:
+4. Ask the user for the **schema owner** (default: the connected user). Store as `<OWNER>` (uppercase) for use in all subsequent queries.
+5. Resolve each pattern against both tables and views:
 
 ```sql
-SELECT table_name FROM user_tables WHERE table_name LIKE '<PATTERN>' ORDER BY 1;
+SELECT object_name, object_type
+  FROM all_objects
+ WHERE owner = '<OWNER>'
+   AND object_type IN ('TABLE', 'VIEW')
+   AND object_name LIKE '<PATTERN>'
+ ORDER BY object_type, object_name;
 ```
 
-5. Combine results, deduplicate, and confirm the resolved table list with the user.
-6. Ask the user which context source to use:
+6. Combine results, deduplicate, and confirm the resolved list with the user. Show the object type (TABLE/VIEW) next to each name.
+7. Ask the user which context source to use:
    - **None** — data model inspection only
    - **UI Defaults** — also query APEX UI Defaults views
    - **APEX Application** — also inspect an APEX application (ask for Application ID)
 
-### Step 1 — For Each Table, Gather Context
+### Step 1 — For Each Table/View, Gather Context
+
+Throughout this step, `<OBJECT>` refers to the table or view name and `<TYPE>` is its object type (`TABLE` or `VIEW`). Use `<OWNER>` from Step 0 in all queries. For sample data and row count queries, qualify the object as `<OWNER>.<OBJECT>`.
 
 #### 1a. Core Data Model Inspection (always)
 
-Run these queries for every table:
+Run these queries for every table/view:
 
 ```sql
 -- Column structure
 SELECT column_name, data_type, data_length, data_precision, data_scale, nullable, column_id
-  FROM user_tab_columns WHERE table_name = '<TABLE>' ORDER BY column_id;
+  FROM all_tab_columns
+ WHERE owner = '<OWNER>' AND table_name = '<OBJECT>'
+ ORDER BY column_id;
 
--- Constraints (PKs, FKs, unique)
+-- Constraints (PKs, FKs, unique) — tables only; skip for views
 SELECT c.constraint_name, c.constraint_type, cc.column_name, c.r_constraint_name
-  FROM user_constraints c
-  JOIN user_cons_columns cc ON c.constraint_name = cc.constraint_name
- WHERE c.table_name = '<TABLE>' ORDER BY c.constraint_type, cc.position;
+  FROM all_constraints c
+  JOIN all_cons_columns cc ON c.owner = cc.owner AND c.constraint_name = cc.constraint_name
+ WHERE c.owner = '<OWNER>' AND c.table_name = '<OBJECT>'
+ ORDER BY c.constraint_type, cc.position;
 
 -- Sample data (10 rows)
-SELECT * FROM <TABLE> FETCH FIRST 10 ROWS ONLY;
+SELECT * FROM <OWNER>.<OBJECT> FETCH FIRST 10 ROWS ONLY;
 
 -- Row count
-SELECT COUNT(*) AS total_rows FROM <TABLE>;
+SELECT COUNT(*) AS total_rows FROM <OWNER>.<OBJECT>;
 
 -- Distinct value counts for string columns (to identify search_facet candidates)
 -- For each VARCHAR2 column:
-SELECT '<COLUMN>' AS col, COUNT(DISTINCT <COLUMN>) AS distinct_count FROM <TABLE>;
+SELECT '<COLUMN>' AS col, COUNT(DISTINCT <COLUMN>) AS distinct_count FROM <OWNER>.<OBJECT>;
 -- Or combine into a single query for efficiency.
 
 -- Existing comments
-SELECT comments FROM user_tab_comments WHERE table_name = '<TABLE>';
-SELECT column_name, comments FROM user_col_comments WHERE table_name = '<TABLE>' ORDER BY column_name;
+SELECT comments FROM all_tab_comments
+ WHERE owner = '<OWNER>' AND table_name = '<OBJECT>';
+SELECT column_name, comments FROM all_col_comments
+ WHERE owner = '<OWNER>' AND table_name = '<OBJECT>'
+ ORDER BY column_name;
 
--- Existing annotations (Oracle 26ai) — WARN USER IF FOUND
-SELECT annotation_name, annotation_value FROM user_annotations WHERE object_name = '<TABLE>' AND object_type = 'TABLE';
-SELECT column_name, annotation_name, annotation_value FROM user_annotations WHERE object_name = '<TABLE>' AND object_type = 'COLUMN' ORDER BY column_name;
+-- Existing annotations (Oracle 23ai/26ai) — WARN USER IF FOUND
+-- Note: all_annotations_usage uses annotation_owner (not object_owner) to identify the schema
+SELECT annotation_name, annotation_value
+  FROM all_annotations_usage
+ WHERE annotation_owner = '<OWNER>' AND object_name = '<OBJECT>' AND column_name IS NULL;
+
+SELECT column_name, annotation_name, annotation_value
+  FROM all_annotations_usage
+ WHERE annotation_owner = '<OWNER>' AND object_name = '<OBJECT>' AND column_name IS NOT NULL
+ ORDER BY column_name, annotation_name;
 ```
 
 If existing annotations are found, **warn the user** and list them. Ask whether to:
@@ -83,13 +104,13 @@ See [apex-views.md](./references/apex-views.md) for full query details and colum
 ```sql
 -- Table-level
 SELECT table_name, form_region_title, report_region_title
-  FROM apex_ui_defaults_tables WHERE table_name = '<TABLE>';
+  FROM apex_ui_defaults_tables WHERE table_name = '<OBJECT>';
 
 -- Column-level
 SELECT column_name, label, help_text, mask_form, mask_report,
        display_in_form, display_in_report, required, alignment,
        group_name, lov_query
-  FROM apex_ui_defaults_columns WHERE table_name = '<TABLE>'
+  FROM apex_ui_defaults_columns WHERE table_name = '<OBJECT>'
  ORDER BY display_seq_form;
 ```
 
@@ -100,13 +121,13 @@ If these views return ORA-00942 or no rows, log a note and proceed with data inf
 See [apex-views.md](./references/apex-views.md) for full query details, column mappings, and error handling.
 
 Query in this order:
-1. `apex_application_page_regions` — find pages/regions using the table
+1. `apex_application_page_regions` — find pages/regions using the table/view
 2. `apex_application_page_items` — get item labels, format masks, help text, LOVs
 3. `apex_appl_page_ig_columns` — get IG column headings, format masks
 4. `apex_application_lovs` + `apex_application_lov_entries` — resolve LOV values
 5. `apex_application_page_val` — get validation rules
 
-If the table is not found in any page/region, warn the user and fall back to UI Defaults or data inference.
+If the table/view is not found in any page/region, warn the user and fall back to UI Defaults or data inference.
 
 ### Step 2 — Apply Decision Heuristics
 
@@ -161,14 +182,18 @@ For each column, determine the value for each annotation type using the priority
 
 See [output-format.md](./references/output-format.md) for the exact file format, directory structure, and canonical examples.
 
-For each table, create:
-1. `annotations/<table_name_lowercase>/table_annotations.sql` — table-level `display_label` and `ai_context`
-2. `annotations/<table_name_lowercase>/column_annotations.sql` — per-column annotations
+For each table or view, create:
+1. `annotations/<object_name_lowercase>/table_annotations.sql` — object-level `display_label` and `ai_context`
+2. `annotations/<object_name_lowercase>/column_annotations.sql` — per-column annotations
+
+**Important:** Use `alter table` for tables and `alter view` for views. Column-level annotation syntax differs:
+- **Table**: `alter table <name> modify <col> annotations (...);`
+- **View**: `alter view <name> modify (<col> annotations (...));`
 
 ### Step 4 — Report
 
 After generating all files:
-1. Show a summary table per table with columns: Column | display_label | format_mask | primary_display_column | search_facet | semantic_type | ai_context (truncated)
+1. Show a summary table per object with columns: Column | display_label | format_mask | primary_display_column | search_facet | semantic_type | ai_context (truncated)
 2. Note any columns where existing annotations were found and what action was taken
 3. List all generated files
 4. Ask the user if they want to execute the scripts against the database via SQLcl MCP
