@@ -152,6 +152,8 @@ For each column, determine the value for each annotation type using the priority
 5. For categorical columns: list all observed values
 6. For derived columns: note derivation logic
 7. Keep concise but comprehensive — this is the most important annotation for AI
+8. **Table-level ai_context**: Only include a row count if the table is clearly a lookup/reference table (small, static, low-cardinality). Do not include row counts for transactional or data tables where the count changes over time.
+9. **Data values**: Only include actual data values for lookup/categorical columns (status codes, types, categories, flags). Never include actual values from personal or transactional columns (names, salaries, SSNs, emails, phone numbers, etc.). Describe the format/pattern instead.
 
 ### Step 3 — Generate Output Files
 

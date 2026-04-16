@@ -110,6 +110,15 @@ Rich natural-language description providing everything an AI assistant needs to 
 - Domain-specific context that isn't obvious from the column name
 - Relationship to other columns in the same table
 
+**Table-level ai_context:**
+- Only include a row count if the table is clearly a lookup/reference table (small, static, low-cardinality). For example: "Contains 50 US state records" or "12 status code entries".
+- Do NOT include row counts for transactional or data tables where the count changes over time.
+
+**Data values in ai_context:**
+- Only include actual data values when the column is clearly a lookup/categorical value (e.g., status codes, types, categories, boolean flags, geographic groupings).
+- NEVER include actual data from non-lookup columns such as person names, salaries, SSNs, emails, phone numbers, addresses, dates of birth, free-text fields, or any other personal/transactional data.
+- Describe the *format and pattern* of such columns instead (e.g., "Firstname.Lastname@domain format" rather than listing actual email addresses).
+
 **Decision priority:**
 1. APEX Application: combine `help_text` + LOV values + validation rules + observed data patterns
 2. APEX UI Defaults: combine `help_text` + observed data patterns
