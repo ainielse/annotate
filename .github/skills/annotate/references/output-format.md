@@ -7,18 +7,18 @@ Each table gets its own directory under `annotations/`:
 ```
 annotations/
 ├── health_patients/
-│   ├── table_comment.sql
-│   └── column_comments.sql
+│   ├── table_annotations.sql
+│   └── column_annotations.sql
 ├── employees/
-│   ├── table_comment.sql
-│   └── column_comments.sql
+│   ├── table_annotations.sql
+│   └── column_annotations.sql
 └── departments/
-    ├── table_comment.sql
-    └── column_comments.sql
+    ├── table_annotations.sql
+    └── column_annotations.sql
 ```
 
 - Directory name: **lowercase** version of the table name
-- Two files per table: `table_comment.sql` and `column_comments.sql`
+- Two files per table: `table_annotations.sql` and `column_annotations.sql`
 
 ## SQL Syntax
 
@@ -27,10 +27,10 @@ Oracle 26ai annotation syntax (not the `ANNOTATIONS (ADD ...)` DDL form):
 ### Table-level annotations
 
 ```sql
--- Table annotation for <TABLE_NAME>
+-- Table annotations for <TABLE_NAME>
 -- APEX UI Defaults: form_region_title = '<value>', report_region_title = '<value>'
-alter table <table_name> annotation display_label '<value>';
-alter table <table_name> annotation ai_context '<value>';
+alter table <table_name> annotations (display_label '<value>');
+alter table <table_name> annotations (ai_context '<value>');
 ```
 
 - Include APEX UI Default titles as a comment if available
@@ -42,12 +42,12 @@ alter table <table_name> annotation ai_context '<value>';
 -- Column annotations for <TABLE_NAME>
 
 -- <COLUMN_NAME>
-alter table <table_name> modify <column_name> annotation display_label '<value>';
-alter table <table_name> modify <column_name> annotation format_mask '<value>';
-alter table <table_name> modify <column_name> annotation primary_display_column 'true';
-alter table <table_name> modify <column_name> annotation search_facet 'true';
-alter table <table_name> modify <column_name> annotation semantic_type '<value>';
-alter table <table_name> modify <column_name> annotation ai_context '<value>';
+alter table <table_name> modify <column_name> annotations (display_label '<value>');
+alter table <table_name> modify <column_name> annotations (format_mask '<value>');
+alter table <table_name> modify <column_name> annotations (primary_display_column 'true');
+alter table <table_name> modify <column_name> annotations (search_facet 'true');
+alter table <table_name> modify <column_name> annotations (semantic_type '<value>');
+alter table <table_name> modify <column_name> annotations (ai_context '<value>');
 ```
 
 **Formatting rules:**
@@ -62,5 +62,5 @@ alter table <table_name> modify <column_name> annotation ai_context '<value>';
 ## Canonical Example
 
 See existing files for the canonical output format:
-- [table_comment.sql](../examples/health_patients/table_comment.sql)
-- [column_comments.sql](../examples/health_patients/column_comments.sql)
+- [table_annotations.sql](../examples/health_patients/table_annotations.sql)
+- [column_annotations.sql](../examples/health_patients/column_annotations.sql)

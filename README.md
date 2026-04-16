@@ -35,11 +35,11 @@ Two files are created per table under `annotations/`:
 ```
 annotations/
 ├── emp/
-│   ├── table_comment.sql      # Table-level display_label and ai_context
-│   └── column_comments.sql    # Per-column annotations
+│   ├── table_annotations.sql      # Table-level display_label and ai_context
+│   └── column_annotations.sql    # Per-column annotations
 └── dept/
-    ├── table_comment.sql
-    └── column_comments.sql
+    ├── table_annotations.sql
+    └── column_annotations.sql
 ```
 
 ### Annotation Types
@@ -57,14 +57,14 @@ annotations/
 
 ```sql
 -- Table-level
-alter table employees annotation display_label 'Employees';
-alter table employees annotation ai_context 'Employee records...';
+alter table employees annotations (display_label 'Employees');
+alter table employees annotations (ai_context 'Employee records...');
 
 -- Column-level
-alter table employees modify hire_date annotation display_label 'Hire Date';
-alter table employees modify hire_date annotation format_mask 'DD-MON-YYYY';
-alter table employees modify hire_date annotation semantic_type 'date';
-alter table employees modify hire_date annotation ai_context 'Date the employee was hired.';
+alter table employees modify hire_date annotations (display_label 'Hire Date');
+alter table employees modify hire_date annotations (format_mask 'DD-MON-YYYY');
+alter table employees modify hire_date annotations (semantic_type 'date');
+alter table employees modify hire_date annotations (ai_context 'Date the employee was hired.');
 ```
 
 ## Repository Structure
@@ -77,8 +77,8 @@ alter table employees modify hire_date annotation ai_context 'Date the employee 
         ├── SKILL.md                 # Skill definition (invoked as /annotate)
         ├── examples/
         │   └── health_patients/     # Canonical output examples
-        │       ├── table_comment.sql
-        │       └── column_comments.sql
+        │       ├── table_annotations.sql
+        │       └── column_annotations.sql
         └── references/
             ├── annotation-types.md  # Guidance for each annotation type
             ├── semantic-types.md    # semantic_type value catalog

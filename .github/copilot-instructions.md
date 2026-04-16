@@ -8,12 +8,12 @@ This is an Oracle 26ai annotation project. The goal is to generate and manage ta
 
 - Oracle Database 26ai (or 23ai+)
 - Use **SQLcl MCP** for all database interactions (connect, query, execute)
-- Annotation syntax: `alter table <table> annotation <type> '<value>';` (table-level) and `alter table <table> modify <column> annotation <type> '<value>';` (column-level)
+- Annotation syntax: `alter table <table> annotations (<type> '<value>');` (table-level) and `alter table <table> modify <column> annotations (<type> '<value>');` (column-level)
 
 ## Output Convention
 
 - Annotation scripts go in `./annotations/<table_name_lowercase>/`
-- Two files per table: `table_comment.sql` and `column_comments.sql`
+- Two files per table: `table_annotations.sql` and `column_annotations.sql`
 - See `.github/skills/annotate/examples/health_patients/` for canonical examples
 
 ## Annotation Types

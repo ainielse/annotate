@@ -13,9 +13,9 @@ Human-readable label for the column or table. Used in UI rendering, reports, and
 
 **Examples:**
 ```sql
-alter table employees modify employee_id annotation display_label 'Employee ID';
-alter table orders modify order_date annotation display_label 'Order Date';
-alter table health_patients modify email_address annotation display_label 'Personal Email Address';
+alter table employees modify employee_id annotations (display_label 'Employee ID');
+alter table orders modify order_date annotations (display_label 'Order Date');
+alter table health_patients modify email_address annotations (display_label 'Personal Email Address');
 ```
 
 ## 2. format_mask
@@ -38,9 +38,9 @@ Display format pattern for the column value. Guides UI rendering and data interp
 
 **Examples:**
 ```sql
-alter table health_patients modify dob annotation format_mask 'DD-MON-YY';
-alter table orders modify total_amount annotation format_mask 'FML999G999G999G990D00';
-alter table health_patients modify cell_phone annotation format_mask '(###) ###-####';
+alter table health_patients modify dob annotations (format_mask 'DD-MON-YY');
+alter table orders modify total_amount annotations (format_mask 'FML999G999G999G990D00');
+alter table health_patients modify cell_phone annotations (format_mask '(###) ###-####');
 ```
 
 ## 3. primary_display_column
@@ -56,9 +56,9 @@ Set to `'true'` for columns that identify a row to a human reader. These are the
 
 **Examples:**
 ```sql
-alter table employees modify first_name annotation primary_display_column 'true';
-alter table employees modify last_name annotation primary_display_column 'true';
-alter table products modify product_name annotation primary_display_column 'true';
+alter table employees modify first_name annotations (primary_display_column 'true');
+alter table employees modify last_name annotations (primary_display_column 'true');
+alter table products modify product_name annotations (primary_display_column 'true');
 ```
 
 ## 4. search_facet
@@ -76,9 +76,9 @@ Set to `'true'` for columns suitable as filter/facet criteria in search interfac
 
 **Examples:**
 ```sql
-alter table health_patients modify state annotation search_facet 'true';
-alter table health_patients modify sex annotation search_facet 'true';
-alter table orders modify order_status annotation search_facet 'true';
+alter table health_patients modify state annotations (search_facet 'true');
+alter table health_patients modify sex annotations (search_facet 'true');
+alter table orders modify order_status annotations (search_facet 'true');
 ```
 
 ## 5. semantic_type
@@ -92,9 +92,9 @@ A machine-readable tag classifying the column's semantic meaning. Used by AI ass
 
 **Examples:**
 ```sql
-alter table health_patients modify email_address annotation semantic_type 'email';
-alter table health_patients modify latitude annotation semantic_type 'latitude';
-alter table employees modify hire_date annotation semantic_type 'date';
+alter table health_patients modify email_address annotations (semantic_type 'email');
+alter table health_patients modify latitude annotations (semantic_type 'latitude');
+alter table employees modify hire_date annotations (semantic_type 'date');
 ```
 
 ## 6. ai_context
@@ -117,7 +117,7 @@ Rich natural-language description providing everything an AI assistant needs to 
 
 **Examples:**
 ```sql
-alter table health_patients modify sex annotation ai_context 'Patient biological sex. Values: Female, Male.';
-alter table health_patients modify upper_first annotation ai_context 'Patient first name stored in uppercase for case-insensitive lookups. Derived from FIRST_NAME.';
-alter table orders modify status annotation ai_context 'Current order fulfillment status. Values: Pending, Processing, Shipped, Delivered, Cancelled. Transitions are one-directional except Cancelled which can occur from any state.';
+alter table health_patients modify sex annotations (ai_context 'Patient biological sex. Values: Female, Male.');
+alter table health_patients modify upper_first annotations (ai_context 'Patient first name stored in uppercase for case-insensitive lookups. Derived from FIRST_NAME.');
+alter table orders modify status annotations (ai_context 'Current order fulfillment status. Values: Pending, Processing, Shipped, Delivered, Cancelled. Transitions are one-directional except Cancelled which can occur from any state.');
 ```

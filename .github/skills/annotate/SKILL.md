@@ -158,8 +158,8 @@ For each column, determine the value for each annotation type using the priority
 See [output-format.md](./references/output-format.md) for the exact file format, directory structure, and canonical examples.
 
 For each table, create:
-1. `annotations/<table_name_lowercase>/table_comment.sql` — table-level `display_label` and `ai_context`
-2. `annotations/<table_name_lowercase>/column_comments.sql` — per-column annotations
+1. `annotations/<table_name_lowercase>/table_annotations.sql` — table-level `display_label` and `ai_context`
+2. `annotations/<table_name_lowercase>/column_annotations.sql` — per-column annotations
 
 ### Step 4 — Report
 
