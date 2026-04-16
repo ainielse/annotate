@@ -50,6 +50,20 @@ alter table <table_name> modify <column_name> annotations (semantic_type '<value
 alter table <table_name> modify <column_name> annotations (ai_context '<value>');
 ```
 
+### Overwriting existing annotations (REPLACE keyword)
+
+When the user chooses **Overwrite** for annotations that already exist on a table or column, use the `REPLACE` keyword inside the `annotations()` clause. Only use `REPLACE` for annotation names that already exist; new annotation names use the plain syntax.
+
+**Table-level:**
+```sql
+alter table <table_name> annotations (REPLACE display_label '<new_value>');
+```
+
+**Column-level:**
+```sql
+alter table <table_name> modify <column_name> annotations (REPLACE display_label '<new_value>');
+```
+
 **Formatting rules:**
 - Table and column names in SQL are **lowercase**
 - Each column is preceded by a `-- COLUMN_NAME` comment (uppercase) with a blank line before it

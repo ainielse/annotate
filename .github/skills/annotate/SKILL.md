@@ -71,8 +71,10 @@ SELECT column_name, annotation_name, annotation_value FROM user_annotations WHER
 
 If existing annotations are found, **warn the user** and list them. Ask whether to:
 - **Skip** columns/tables that already have annotations
-- **Overwrite** existing annotations
+- **Overwrite** existing annotations — use the `REPLACE` keyword in the generated SQL (e.g., `annotations (REPLACE display_label 'New Label')`)
 - **Merge** (only add missing annotation types, keep existing values)
+
+Track which specific annotation names on which tables/columns already exist so that Step 3 can emit the correct syntax (`REPLACE` for overwrite, plain for new).
 
 #### 1b. APEX UI Defaults (if user chose "UI Defaults")
 
