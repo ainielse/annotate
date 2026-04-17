@@ -143,7 +143,7 @@ For each column, determine the value for each annotation type using the priority
 2. **UI Defaults**: `mask_form` or `mask_report`
 3. **Fallback**: Infer from sample data patterns:
    - Phone `(###) ###-####` → `(###) ###-####`
-   - DATE columns → `DD-MON-YY` (match observed format)
+   - DATE columns → `DD-MON-YYYY` (match observed format)
    - Year-only strings → `YYYY`
    - Currency → `FML999G999G999G990D00`
 4. Only include if a meaningful format exists. Omit for plain text or numeric IDs.
