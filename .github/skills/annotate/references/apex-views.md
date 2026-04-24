@@ -53,14 +53,16 @@ Query these views when the user selects "APEX Application" and provides an Appli
 
 ### Step 1: Find pages/regions using the table
 
+
 ```sql
-SELECT r.application_id, r.page_id, r.region_name, r.source_type,
-       r.region_type, r.source_type_code
+SELECT r.application_id, r.page_id, r.region_name, r.source_type, r.source_type_code
   FROM apex_application_page_regions r
  WHERE r.application_id = :app_id
    AND UPPER(r.source_type) LIKE '%TABLE%'
-   AND (   UPPER(r.table_name) = :table_name
-        OR UPPER(r.source) LIKE '%' || :table_name || '%')
+   AND (
+         UPPER(r.table_name) = :table_name
+      OR UPPER(r.region_source) LIKE '%' || :table_name || '%'
+   )
  ORDER BY r.page_id;
 ```
 
@@ -75,7 +77,7 @@ SELECT r.application_id, r.page_id, r.region_name, r.source_type,
 ```sql
 SELECT i.item_name, i.label, i.display_as, i.format_mask,
        i.lov_named_lov, i.lov_definition, i.item_help_text,
-       i.item_default, i.item_pre_text, i.item_post_text,
+       i.item_default, i.pre_element_text, i.post_element_text,
        i.placeholder, i.is_required,
        i.item_source_type, i.item_source
   FROM apex_application_page_items i
@@ -84,8 +86,10 @@ SELECT i.item_name, i.label, i.display_as, i.format_mask,
    AND i.page_id = r.page_id
    AND i.region_id = r.region_id
  WHERE i.application_id = :app_id
-   AND (   UPPER(r.table_name) = :table_name
-        OR UPPER(i.item_source) = :column_name)
+   AND (
+         UPPER(r.table_name) = :table_name
+      OR UPPER(i.item_source) = :column_name
+   )
  ORDER BY i.page_id, i.display_sequence;
 ```
 
@@ -104,8 +108,8 @@ SELECT i.item_name, i.label, i.display_as, i.format_mask,
 ### Step 3: Get Interactive Grid columns
 
 ```sql
-SELECT c.column_alias, c.heading, c.format_mask,
-       c.lov_named_lov, c.lov_definition
+SELECT c.name AS column_alias, c.heading, c.format_mask,
+       c.lov_type, c.lov_id, c.lov_source
   FROM apex_appl_page_ig_columns c
   JOIN apex_application_page_regions r
     ON c.application_id = r.application_id
@@ -131,15 +135,12 @@ For named LOVs referenced by page items or IG columns:
 -- Named LOV with static entries
 SELECT e.display_value, e.return_value
   FROM apex_application_lov_entries e
-  JOIN apex_application_lovs l
-    ON e.application_id = l.application_id
-   AND e.lov_name = l.list_of_values_name
- WHERE l.application_id = :app_id
-   AND l.list_of_values_name = :lov_name
+ WHERE e.application_id = :app_id
+   AND e.list_of_values_name = :lov_name
  ORDER BY e.display_sequence;
 
 -- Named LOV with dynamic query
-SELECT l.lov_query
+SELECT l.list_of_values_query
   FROM apex_application_lovs l
  WHERE l.application_id = :app_id
    AND l.list_of_values_name = :lov_name;
@@ -151,11 +152,13 @@ SELECT l.lov_query
 
 ```sql
 SELECT v.validation_name, v.validation_type, v.validation_expression1,
-       v.validation_expression2, v.error_message
+       v.validation_expression2, v.validation_failure_text
   FROM apex_application_page_val v
  WHERE v.application_id = :app_id
-   AND (   UPPER(v.associated_item) LIKE '%' || :column_name
-        OR UPPER(v.validation_expression1) LIKE '%' || :column_name || '%')
+   AND (
+         UPPER(v.associated_item) LIKE '%' || :column_name
+      OR UPPER(v.validation_expression1) LIKE '%' || :column_name || '%'
+   )
  ORDER BY v.page_id;
 ```
 
