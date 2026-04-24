@@ -58,7 +58,7 @@ Query these views when the user selects "APEX Application" and provides an Appli
 SELECT r.application_id, r.page_id, r.region_name, r.source_type, r.source_type_code
   FROM apex_application_page_regions r
  WHERE r.application_id = :app_id
-   AND UPPER(r.source_type) LIKE '%TABLE%'
+   --AND UPPER(r.source_type) LIKE '%TABLE%'
    AND (
          UPPER(r.table_name) = :table_name
       OR UPPER(r.region_source) LIKE '%' || :table_name || '%'
@@ -88,7 +88,7 @@ SELECT i.item_name, i.label, i.display_as, i.format_mask,
  WHERE i.application_id = :app_id
    AND (
          UPPER(r.table_name) = :table_name
-      OR UPPER(i.item_source) = :column_name
+      and UPPER(i.item_source) = :column_name
    )
  ORDER BY i.page_id, i.display_sequence;
 ```
